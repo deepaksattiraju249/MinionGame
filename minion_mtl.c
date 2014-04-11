@@ -1,0 +1,9 @@
+const float Black[3] = {0,0,0};
+const float Brown[3] = {0.106291,0.061823,0.013445};
+const float Eyes[3] = {0.8,0.8,0.8};
+const float Jeans[3] = {0.099216,0.289731,0.7528};
+const float Material[3] = {0.64,0.64,0.64};
+const float Shoes[3] = {0,0,0};
+const float mouth[3] = {0,0,0};
+const float teeth[3] = {0.662046,0.662046,0.662046};
+const float yellow[3] = {0.683983,0.677096,0};
