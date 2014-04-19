@@ -1,9 +1,11 @@
 #include <windows.h>   // Standard Header For Most Programs
 #include <gl/gl.h>     // The GL Header File
 #include <gl/glut.h>   // The GL Utility Toolkit (Glut) Header
-#include "maze.c"
-#include "minion.c"
-using namespace std;
+#include<stdio.h>
+
+#include "C:\\Users\\deepakSattiraju\\Desktop\\maze.c"
+#include "C:\\Users\\deepakSattiraju\\Desktop\\minion.c"
+
 GLfloat red_diffuse[] = {1.0f,0.0f,0.0f};
 GLfloat green_diffuse[] = {0.0f,1.0f,0.0f};
 GLfloat blue_diffuse[] = {0.0f,0.0f,1.0f};
@@ -19,9 +21,9 @@ int y_pos = 0;
 int x_pos = 0;
 int z_const = 5;
 int player_x = 0, player_y = 1, player_face = 0;
-int y_max[] = {10,22}, y_min = 0;
-int x_max[] = {20,19}, x_min = 0;
-int level = 0;
+int y_max = 20, y_min = 0;
+int x_max = 22, x_min = 0;
+int level = 1;
 
 void drawFloor(int x, int y)
 {
@@ -57,12 +59,14 @@ void drawPlayer()
 	}
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPos4);
 	//glMaterialfv(GL_FRONT, GL_SPECULAR,specular);
-	for(int j = 0; j<15; j++)
+	int j;
+	for(j = 0; j<15; j++)
 	{
 		
 		glBegin(GL_TRIANGLES);
 		int i = 0;
-		while(mtls[j][i]!=NULL)
+		
+		while(mtls[j][i]!='\0')
 		{
 			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,mtl_kds[j]);
 			glVertex3f(mtls[j][i]/-10.0f,mtls[j][i+1]/10.0f,mtls[j][i+2]/10.0f);
@@ -72,9 +76,8 @@ void drawPlayer()
 			glVertex3f(mtls[j][i+3]/10.0f,mtls[j][i+4]/10.0f,mtls[j][i+5]/10.0f);
 			glVertex3f(mtls[j][i+6]/10.0f,mtls[j][i+7]/10.0f,mtls[j][i+8]/10.0f);
 			i = i+9;
-		}
 			
-
+		}
 	    glEnd();
 	    
 	}
@@ -161,25 +164,108 @@ void display ( void )   // Create The Display Function
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPos1);
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPos2);
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPos4);
-	for(int i = 0; i < x_max[level]+1; i++)
+	if(level == 1)
 	{
-		for(int j = 0; j < y_max[level]+1; j++)
+		int i;
+		for( i = 0; i < x_max+1; i++)
 		{
-			if(maze[level][i][j] == 1)
+			int j;
+			for(j = 0; j < y_max+1; j++)
 			{
-				drawBox(i,j);
-			}
-			else
-			{
-				drawFloor(i,j);
+				if(maze1[i][j] == 1)
+				{
+					drawBox(i,j);
+				}
+				if(maze1[i][j]==0)
+				{
+					drawFloor(i,j);
+				}
 			}
 		}
+		
+	drawPlayer();	
+	}
+	else if(level==2)
+	{
+		int i;
+		for(i = 0; i < x_max+1; i++)
+		{
+			int j;
+			for( j = 0; j < y_max+1; j++)
+			{
+				if(maze2[i][j] == 1)
+				{
+					drawBox(i,j);
+				}
+				else
+				{
+					drawFloor(i,j);
+				}
+			}
+		}
+		
+	drawPlayer();
+	}
+	else
+	{
+		glLoadIdentity();									// Reset The Current Modelview Matrix
+			glPushMatrix();
+			glColor3f(1.0f, 1.0f, 1.0f);
+			
+			text();
+			
+			glPopMatrix();
 	}
 	
-	
-	drawPlayer();
 	glPopMatrix();
 	glutSwapBuffers();
+}
+void showString(char s[128]){
+	/**
+	* Prints the given string in the Graphic window using Bit-Map array
+	*/
+	int size=108*10;
+	void * font;
+	if(size<=18)
+		font = GLUT_BITMAP_9_BY_15; //GLUT_BITMAP_HELVETICA_18;
+	else
+//		font = GLUT_BITMAP_HELVETICA_18;
+		font = GLUT_BITMAP_TIMES_ROMAN_24;
+	int i;
+    for ( i = 0; s[i]!='\0'; ++i)
+    {
+        char c = s[i]; 
+        glutBitmapCharacter(font, c);
+    }
+}
+
+void text(){
+	/**
+	* Draws the text which guides the gameplay using the showString function
+	*/
+	glMatrixMode( GL_PROJECTION ) ;
+	glPushMatrix() ; // save
+	glLoadIdentity();// and clear
+	glMatrixMode( GL_MODELVIEW ) ;
+	glPushMatrix() ;
+	glLoadIdentity() ;
+	glTranslatef(0.6f,0.0f,1.0f);
+	//glScalef(3.0f,3.0f,1.0f);
+	glDisable( GL_DEPTH_TEST ) ;
+    glDisable(GL_LIGHTING);
+    glColor4f(1.0f, 1.0f, 1.0f,1.0f);
+    glRasterPos2f(-0.8, 0);
+    char s[128];
+    sprintf(s,"YOU WIN!!! Press ESC to exit");
+    showString(s);
+
+    glEnable(GL_LIGHTING);
+    glEnable( GL_DEPTH_TEST ) ; // Turn depth testing back on
+
+	glMatrixMode( GL_PROJECTION ) ;
+	glPopMatrix() ; 
+	glMatrixMode( GL_MODELVIEW ) ;
+	glPopMatrix() ;
 }
 
 void reshape ( int width , int height )   // Create The Reshape Function (the viewport)
@@ -206,84 +292,161 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
   switch ( key ) {
     case 27:        // When Escape Is Pressed...
       exit ( 0 );   // Exit The Program
-      break;        // Ready For Next Case
-    default:        // Now Wrap It Up
+      break;       
+    default:      
       break;
   }
 }
 
 void arrow_keys ( int a_keys, int x, int y )  // Create Special Function (required for arrow keys)
 {
-  switch ( a_keys ) {
-    case GLUT_KEY_UP:     // When Up Arrow Is Pressed...
-		//y_pos--;
-		if(player_face==1&&player_y+1<=y_max[level]&&maze[level][player_x][player_y+1]!=1)
-		{
-			y_pos--;
-			player_y++;
-		}
-		if(player_face!=1)
-		{
-			player_face = 1;
-		}
-      	break;
-    case GLUT_KEY_DOWN:               // When Down Arrow Is Pressed...
-    	//y_pos++;
-    	if(player_face==3&&player_y-1>=y_min&&maze[level][player_x][player_y-1]!=1)
-		{
-			y_pos++;
-			player_y--;
-		}
-		if(player_face!=3)
-		{
-			player_face = 3;
-		}
-      	break;
-    case GLUT_KEY_LEFT:               // When Left Arrow Is Pressed...
-    	
-    	if(player_face==2&&player_x-1>=x_min&&maze[level][player_x-1][player_y]!=1)
-		{
-			x_pos++;
-			player_x--;
-		}
-		if(player_face!=2)
-		{
-			player_face = 2;
-		}
-      	break;
-    case GLUT_KEY_RIGHT:               // When Right Arrow Is Pressed...
-    	
-    	if(player_face==0&&player_x+1<=x_max[level]&&maze[level][player_x+1][player_y]!=1)
-		{
-			x_pos--;
-			player_x++;
-		}
-		if(player_face!=0)
-		{
-			player_face = 0;
-		}
-      	break;
-    default:
-      	break;
-    
-	
-	
-  }
-  if(player_x == x_max[level]&&player_y == y_max[level])  
-  {
-  	//sleep(2000);
-  	exit(0);
-  }
+	if(level == 1)
+	{
+		
+	  switch ( a_keys ) {
+	    case GLUT_KEY_UP:     // When Up Arrow Is Pressed...
+			//y_pos--;
+			if(player_face==1&&player_y+1<=y_max&&maze1[player_x][player_y+1]!=1)
+			{
+				y_pos--;
+				player_y++;
+			}
+			if(player_face!=1)
+			{
+				player_face = 1;
+			}
+	      	break;
+	    case GLUT_KEY_DOWN:               // When Down Arrow Is Pressed...
+	    	//y_pos++;
+	    	if(player_face==3&&player_y-1>=y_min&&maze1[player_x][player_y-1]!=1)
+			{
+				y_pos++;
+				player_y--;
+			}
+			if(player_face!=3)
+			{
+				player_face = 3;
+			}
+	      	break;
+	    case GLUT_KEY_LEFT:               // When Left Arrow Is Pressed...
+	    	
+	    	if(player_face==2&&player_x-1>=x_min&&maze1[player_x-1][player_y]!=1)
+			{
+				x_pos++;
+				player_x--;
+			}
+			if(player_face!=2)
+			{
+				player_face = 2;
+			}
+	      	break;
+	    case GLUT_KEY_RIGHT:               // When Right Arrow Is Pressed...
+	    	
+	    	if(player_face==0&&player_x+1<=x_max&&maze1[player_x+1][player_y]!=1)
+			{
+				x_pos--;
+				player_x++;
+			}
+			if(player_face!=0)
+			{
+				player_face = 0;
+			}
+	      	break;
+	    default:
+	      	break;
+	    
+		
+		
+		  }
+		  if(player_x == x_max&&player_y == y_max-1)  
+		  {
+		  	//sleep(2000);
+		  	level = 2;
+		  	player_x = 0;
+		  	player_y = 0;
+		  	x_pos = 0;
+		  	y_pos = 0;
+		  }
   //cout<<player_x<<" "<< player_y<<endl;
+	}
+	else if(level == 2)
+	{
+				
+		  switch ( a_keys ) {
+		    case GLUT_KEY_UP:     // When Up Arrow Is Pressed...
+				//y_pos--;
+				if(player_face==1&&player_y+1<=y_max&&maze2[player_x][player_y+1]!=1)
+				{
+					y_pos--;
+					player_y++;
+				}
+				if(player_face!=1)
+				{
+					player_face = 1;
+				}
+		      	break;
+		    case GLUT_KEY_DOWN:               // When Down Arrow Is Pressed...
+		    	//y_pos++;
+		    	if(player_face==3&&player_y-1>=y_min&&maze2[player_x][player_y-1]!=1)
+				{
+					y_pos++;
+					player_y--;
+				}
+				if(player_face!=3)
+				{
+					player_face = 3;
+				}
+		      	break;
+		    case GLUT_KEY_LEFT:               // When Left Arrow Is Pressed...
+		    	
+		    	if(player_face==2&&player_x-1>=x_min&&maze2[player_x-1][player_y]!=1)
+				{
+					x_pos++;
+					player_x--;
+				}
+				if(player_face!=2)
+				{
+					player_face = 2;
+				}
+		      	break;
+		    case GLUT_KEY_RIGHT:               // When Right Arrow Is Pressed...
+		    	
+		    	if(player_face==0&&player_x+1<=x_max&&maze2[player_x+1][player_y]!=1)
+				{
+					x_pos--;
+					player_x++;
+				}
+				if(player_face!=0)
+				{
+					player_face = 0;
+				}
+		      	break;
+		    default:
+		      	break;
+		    
+			
+			
+		  }
+		  if(player_x == x_max&&player_y == y_max-1)  
+		  {
+  	//sleep(2000);
+		  	level++;
+		  	
+		  }
+		  //cout<<player_x<<" "<< player_y<<endl;
+	}
+	else{
+		text();
+	}
 }
 
 
 int main ( int argc, char** argv )   // Create Main Function For Bringing It All Together
 {
-  glutInit            ( &argc, argv ); // Erm Just Write It =)
+  glutInit            ( &argc, argv );
   glutInitDisplayMode ( GLUT_RGBA | GLUT_DOUBLE ); // Display Mode
   glutInitWindowSize  ( 500, 500 ); // If glutFullScreen wasn't called this is the window size
-  glutCreateWindow    ( "NeHe's OpenGL Framework" ); // Window Title (argv[0] for current directory as title)
+  glutCreateWindow    ( "Dave's Dilemma" ); // Window Title (argv[0] for current directory as title)
   glutFullScreen      ( );          // Put Into Full Screen
   InitGL ();
   glutDisplayFunc     ( display );  // Matching Earlier Functions To Their Counterparts
